@@ -46,6 +46,7 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:5px 18px 20px
   <div class="progressrow"><b>Tiến độ hoàn thành</b><strong id="pct">0%</strong></div><div class="bar"><i id="bar"></i></div>
   <div class="progressrow"><span id="countLabel">0 / 0 nhiệm vụ</span><span>Đánh dấu khi hoàn thành</span></div>
  </section>
+ <p class="note" style="margin:0 2px 9px">Khung giờ là lịch dự kiến để bạn dễ bắt đầu; có thể xê dịch theo giờ đi lại, lịch học/thi thực tế và mức độ mệt trong ngày.</p>
  <section id="tasks"></section>
  <div class="actions"><button class="smallbtn" id="reset">↻ Reset ngày này</button><button class="smallbtn" id="copy">▢ Copy checklist</button></div>
  <p class="note">Tiến độ được lưu trên trình duyệt của thiết bị này. Nếu mở trên điện thoại và máy tính, dữ liệu checklist không tự đồng bộ giữa hai thiết bị.</p>
@@ -67,8 +68,8 @@ const cats={inpatient:['NỘI TRÚ','#eaf1f8','#31536f'],ti:['TRUYỀN NHIỄM',
 const key=(date,id)=>'studytracker:'+date+':'+id;
 function tasksFor(date){
  const d=new Date(date+'T12:00:00'), dow=d.getDay(), n=+date.slice(8,10), m=date.slice(5,7);
- const clinical=date==='2026-11-13'||(date>='2026-11-16'&&date<='2026-11-20')||(date>='2026-11-23'&&date<='2026-11-27')||date==='2026-11-30'||(date>='2026-12-01'&&date<='2026-12-04');
  const psychExam=date==='2026-11-14', tiExam=date==='2026-11-19'||date==='2026-12-04', concert=date==='2026-12-06';
+ const clinical=!tiExam&&(date==='2026-11-13'||(date>='2026-11-16'&&date<='2026-11-20')||(date>='2026-11-23'&&date<='2026-11-27')||date==='2026-11-30'||(date>='2026-12-01'&&date<='2026-12-04'));
  let a=[];const add=(id,name,time,detail,cat)=>a.push({id,name,time,detail,cat});
  if(clinical)add('clinical','Lâm sàng Truyền nhiễm','08:00–12:00','Đi viện, ghi lại các nội dung cần ôn','clinical');
  if(psychExam)add('exam','THI TÂM THẦN','Buổi sáng','Ưu tiên đi thi, không cần học Tâm thần sau hôm nay','exam');
@@ -92,9 +93,71 @@ function tasksFor(date){
   if(dow===6)add('vstep','VSTEP: Listening + Reading','60–90 phút','Duy trì hai kỹ năng tiếp nhận','vstep');
   if(dow===0)add('vstep','VSTEP: Writing + Speaking','90 phút','Ôn hai kỹ năng trọng tâm','vstep');
   add('edit','Edit','2 giờ','Hoàn thành định mức công việc trong ngày','edit');
-  if(dow===6)add('ielts','IELTS online (không bắt buộc)','07:30–09:00','Có thể bỏ qua nếu bận hoặc cần nghỉ','ielts');
+  if(dow===6&&!psychExam&&!tiExam)add('ielts','IELTS online (không bắt buộc)','07:30–09:00','Có thể bỏ qua nếu bận hoặc cần nghỉ','ielts');
   add('reading','Đọc sách','15–30 phút','Đọc thư giãn trước khi ngủ','reading');
  }else add('reading','Đọc sách (tùy sức)','15 phút','Không bắt buộc trong ngày concert','reading');
+ // Gán khung giờ cụ thể cho từng checklist, theo loại ngày.
+ const t50=['2026-11-16','2026-11-23','2026-11-30'].includes(date);
+ const set=(id,time,detail)=>{const item=a.find(x=>x.id===id);if(item){item.time=time;if(detail)item.detail=detail}};
+ if(concert){
+  set('concert','Theo giờ trên vé / BTC','Dành thời gian di chuyển, check-in và tham gia concert');
+  set('reading','22:30–22:45','Đọc nhẹ nếu còn sức');
+ }else if(psychExam){
+  set('exam','Buổi sáng · theo lịch thi');
+  set('inpatient','13:30–14:30','Ôn duy trì nhẹ nhàng sau buổi thi');
+  set('ti','14:45–15:45');
+  set('vstep','16:00–17:00');
+  set('edit','19:00–21:00');
+  set('reading','22:15–22:30');
+ }else if(tiExam){
+  set('exam','Theo lịch thi của trường');
+  set('inpatient','13:30–14:30','Ôn duy trì nhẹ nhàng sau buổi thi');
+  set('vstep','15:00–16:00');
+  set('edit','19:00–21:00');
+  set('reading','22:15–22:30');
+ }else if(t50){
+  set('clinical','08:00–12:00');
+  set('vstep','13:00–14:00','Một phiên luyện ngắn trước buổi học nhóm');
+  set('inpatient','14:00–15:30','Ôn chuyên đề, chuẩn bị nội dung cho T50');
+  set('ti','15:30–16:30');
+  set('edit','16:30–18:00','Định mức rút gọn 1,5 giờ trong ngày có T50');
+  set('t50','18:00–23:00');
+  set('reading','23:10–23:25','Đọc nhẹ nếu chưa quá mệt');
+ }else if(clinical){
+  set('clinical','08:00–12:00');
+  set('psych','13:15–14:45');
+  set('inpatient',a.some(x=>x.id==='psych')?'15:00–16:30':'13:15–15:15');
+  set('practice',a.some(x=>x.id==='psych')?'16:30–17:00':'15:30–16:30');
+  set('ti','17:00–18:00');
+  set('vstep','19:00–20:15');
+  set('edit','20:30–22:30');
+  set('reading','22:30–22:45');
+ }else if(dow===0){
+  set('inpatient','09:00–11:30');
+  set('review','13:30–15:30');
+  set('ti','15:45–16:45');
+  set('vstep','17:00–18:30');
+  set('edit','19:30–21:30');
+  set('reading','22:15–22:30');
+ }else if(dow===6){
+  set('ielts','07:30–09:00 · tùy chọn');
+  set('inpatient','09:30–12:00');
+  set('ti','13:30–14:30');
+  set('vstep','15:00–16:30');
+  set('edit','19:00–21:00');
+  set('reading','22:15–22:30');
+ }else{
+  set('inpatient','08:30–10:30');
+  set('practice','10:45–12:00');
+  set('psych','14:00–16:00');
+  set('ti','14:00–15:15');
+  set('vstep','16:15–17:15');
+  set('edit','19:00–21:00');
+  set('reading','22:15–22:30');
+ }
+ // Hiển thị checklist theo đúng thứ tự thời gian trong ngày.
+ const startMinutes=t=>{const m=t.time.match(/(\d{2}):(\d{2})/);return m?Number(m[1])*60+Number(m[2]):0};
+ a.sort((x,y)=>startMinutes(x)-startMinutes(y));
  return a;
 }
 function labelDate(s){const d=new Date(s+'T12:00:00');return ['Chủ Nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'][d.getDay()]}
