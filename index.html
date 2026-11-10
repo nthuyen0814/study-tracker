@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#182c42">
+<meta name="description" content="Study Tracker 10/11–06/12/2026">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>Study Tracker</title>
+<style>
+:root{--navy:#182c42;--blue:#31536f;--bg:#f3f6f8;--card:#fff;--ink:#172536;--muted:#718096;--line:#e5ebf0;--green:#279b78;--gold:#c48b28;--red:#c75b5b;--radius:18px}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;padding-bottom:calc(24px + env(safe-area-inset-bottom))}
+header{background:var(--navy);color:#fff;padding:22px 18px 24px;border-radius:0 0 24px 24px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px}.brand{font-weight:800;letter-spacing:.08em;font-size:13px}.pill{font-size:11px;background:#29445d;padding:6px 10px;border-radius:99px;color:#dce9f4}
+h1{font-size:27px;line-height:1.15;margin:22px 0 6px}header p{margin:0;color:#d5e1ed;font-size:13px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:20px}.stat{background:#29445d;border-radius:13px;padding:11px}.stat strong{display:block;font-size:22px}.stat span{font-size:11px;color:#d5e1ed}
+main{max-width:720px;margin:auto;padding:16px 14px}.panel,.task,.milestones{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:15px;margin-bottom:13px;box-shadow:0 3px 12px #15283a08}
+.panelhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}h2{font-size:17px;margin:0}.date-controls{display:flex;gap:8px;align-items:center}.date-controls button,.smallbtn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 11px;color:var(--ink);font-weight:600}
+input[type=date]{font:inherit;border:1px solid var(--line);border-radius:10px;padding:9px;min-width:0;max-width:100%;background:white}
+.dayline{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:12px 0}.dayline strong{font-size:19px}.event{font-size:11px;background:#fff2d8;color:#805b15;padding:6px 9px;border-radius:99px;font-weight:700}
+.progressrow{display:flex;justify-content:space-between;align-items:center;font-size:13px;margin:12px 0 7px}.bar{height:9px;border-radius:99px;background:#e9eef1;overflow:hidden}.bar>i{display:block;height:100%;width:0;background:var(--green);border-radius:99px;transition:width .2s}
+.task{padding:13px 14px;display:flex;gap:12px;align-items:flex-start;margin-bottom:9px}.task.done{opacity:.62}.task.done .taskname{text-decoration:line-through}.taskbody{flex:1;min-width:0}.meta{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-bottom:5px}.tag{font-size:10px;letter-spacing:.04em;font-weight:800;padding:4px 7px;border-radius:6px;background:#eaf1f8;color:#31536f}.time{font-size:11px;color:var(--muted)}.taskname{font-weight:700}.detail{font-size:12px;color:var(--muted);margin-top:3px}
+input[type=checkbox]{appearance:none;flex:0 0 24px;width:24px;height:24px;border:2px solid #b9c6d1;border-radius:8px;margin:1px 0 0;position:relative}
+input[type=checkbox]:checked{background:var(--green);border-color:var(--green)}input[type=checkbox]:checked:after{content:"✓";position:absolute;color:white;font-weight:900;left:4px;top:-1px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}.actions button{flex:1}.smallbtn{font-size:12px}
+.milestones{display:grid;gap:9px}.milestone{display:flex;gap:10px;align-items:center;font-size:13px}.milestone b{font-size:11px;background:#edf1f5;padding:5px 8px;border-radius:7px;min-width:48px;text-align:center}
+.note{font-size:12px;color:var(--muted);line-height:1.5;margin:12px 2px}
+.install{display:none;background:#e8f4ef;color:#17664d;border:1px solid #c8e6d9;border-radius:13px;padding:12px;margin-bottom:13px;font-size:13px}
+footer{text-align:center;color:var(--muted);font-size:11px;padding:5px 18px 20px}
+@media(min-width:600px){header{padding:28px max(24px,calc((100vw - 680px)/2)) 28px}main{padding-top:22px}.task{padding:15px 17px}}
+</style>
+</head>
+<body>
+<header>
+ <div class="top"><div class="brand">✦ STUDY TRACKER</div><div class="pill">10 NOV — 06 DEC 2026</div></div>
+ <h1>One day at a time.</h1><p>Lịch học, checklist và tiến độ cá nhân</p>
+ <div class="stats"><div class="stat"><strong id="allDone">0</strong><span>Việc đã xong</span></div><div class="stat"><strong id="todayCount">0/0</strong><span>Hôm nay</span></div><div class="stat"><strong id="todayPct">0%</strong><span>Tiến độ ngày</span></div></div>
+</header>
+<main>
+ <div class="install" id="installHint">Bạn có thể thêm Study Tracker vào màn hình chính để mở như một ứng dụng.</div>
+ <section class="panel">
+  <div class="panelhead"><h2>Lịch của bạn</h2><button class="smallbtn" id="todayBtn">Về ngày đầu</button></div>
+  <div class="date-controls"><button id="prev" aria-label="Ngày trước">‹</button><input type="date" id="date" min="2026-11-10" max="2026-12-06" value="2026-11-10"><button id="next" aria-label="Ngày sau">›</button></div>
+  <div class="dayline"><strong id="dayTitle">Thứ Ba</strong><span id="eventTag" class="event" hidden></span></div>
+  <div class="progressrow"><b>Tiến độ hoàn thành</b><strong id="pct">0%</strong></div><div class="bar"><i id="bar"></i></div>
+  <div class="progressrow"><span id="countLabel">0 / 0 nhiệm vụ</span><span>Đánh dấu khi hoàn thành</span></div>
+ </section>
+ <section id="tasks"></section>
+ <div class="actions"><button class="smallbtn" id="reset">↻ Reset ngày này</button><button class="smallbtn" id="copy">▢ Copy checklist</button></div>
+ <p class="note">Tiến độ được lưu trên trình duyệt của thiết bị này. Nếu mở trên điện thoại và máy tính, dữ liệu checklist không tự đồng bộ giữa hai thiết bị.</p>
+ <section class="panel">
+  <div class="panelhead"><h2>Các mốc quan trọng</h2></div>
+  <div class="milestones">
+   <div class="milestone"><b>14/11</b> Thi Tâm thần</div><div class="milestone"><b>16/11</b> T50 · 18h–23h</div>
+   <div class="milestone"><b>19/11</b> Thi Truyền nhiễm</div><div class="milestone"><b>23/11</b> T50 · 18h–23h</div>
+   <div class="milestone"><b>30/11</b> T50 · 18h–23h</div><div class="milestone"><b>04/12</b> Thi Truyền nhiễm</div>
+   <div class="milestone"><b>06/12</b> Concert ATVNCG</div>
+  </div>
+ </section>
+</main>
+<footer>Study Tracker · 2026</footer>
+<script>
+const $=id=>document.getElementById(id), dateInput=$('date');
+const start=new Date('2026-11-10T12:00:00'), end=new Date('2026-12-06T12:00:00');
+const cats={inpatient:['NỘI TRÚ','#eaf1f8','#31536f'],ti:['TRUYỀN NHIỄM','#fff2d8','#805b15'],psych:['TÂM THẦN','#f2eafa','#74499b'],vstep:['VSTEP','#e8f4ef','#17664d'],edit:['EDIT','#e8f4ef','#17664d'],reading:['ĐỌC SÁCH','#f0f1f4','#586574'],ielts:['IELTS','#f0f1f4','#586574'],clinical:['LÂM SÀNG','#eaf1f8','#31536f'],exam:['KỲ THI','#fdeaea','#a33b3b'],event:['SỰ KIỆN','#e8f4ef','#17664d']};
+const key=(date,id)=>'studytracker:'+date+':'+id;
+function tasksFor(date){
+ const d=new Date(date+'T12:00:00'), dow=d.getDay(), n=+date.slice(8,10), m=date.slice(5,7);
+ const clinical=date==='2026-11-13'||(date>='2026-11-16'&&date<='2026-11-20')||(date>='2026-11-23'&&date<='2026-11-27')||date==='2026-11-30'||(date>='2026-12-01'&&date<='2026-12-04');
+ const psychExam=date==='2026-11-14', tiExam=date==='2026-11-19'||date==='2026-12-04', concert=date==='2026-12-06';
+ let a=[];const add=(id,name,time,detail,cat)=>a.push({id,name,time,detail,cat});
+ if(clinical)add('clinical','Lâm sàng Truyền nhiễm','08:00–12:00','Đi viện, ghi lại các nội dung cần ôn','clinical');
+ if(psychExam)add('exam','THI TÂM THẦN','Buổi sáng','Ưu tiên đi thi, không cần học Tâm thần sau hôm nay','exam');
+ else if(date>='2026-11-10'&&date<='2026-11-13')add('psych','Ôn thi Tâm thần','1,5–2,5 giờ','Ôn trọng tâm, tự kiểm tra kiến thức','psych');
+ if(tiExam)add('exam','THI TRUYỀN NHIỄM','Theo lịch thi','Ôn nhanh trước thi, ưu tiên hoàn thành kỳ thi','exam');
+ else if(date>='2026-11-13'&&date<='2026-12-03')add('ti','Truyền nhiễm: ôn bài','1–1,5 giờ','Ôn bài lâm sàng trong ngày, hệ thống hóa và tự kiểm tra','ti');
+ if(concert)add('concert','Concert ATVNCG','Buổi chiều/tối','Chuẩn bị và tận hưởng concert','event');
+ if(['2026-11-16','2026-11-23','2026-11-30'].includes(date))add('t50','Học nhóm Nội trú T50','18:00–23:00','Lịch cố định, chuẩn bị nội dung trước buổi học','inpatient');
+ if(!psychExam&&!tiExam&&!concert){
+  if(dow===0){add('inpatient','Nội trú: làm test tuần','2–2,5 giờ','Làm bài có bấm giờ, không xem tài liệu','inpatient');add('review','Nội trú: chữa test','1,5–2 giờ','Phân loại lỗi sai và ghi lại kiến thức yếu','inpatient')}
+  else if(dow===6){add('inpatient','Nội trú: học chuyên đề','2–2,5 giờ','Hoàn thành chuyên đề và câu hỏi liên quan','inpatient');add('review','Nội trú: củng cố kiến thức','1 giờ','Ôn lại nội dung đã học trong tuần','inpatient')}
+  else if(['2026-11-16','2026-11-23','2026-11-30'].includes(date))add('inpatient','Nội trú: ôn chuyên đề','1,5 giờ','Chuẩn bị cho buổi học nhóm T50','inpatient');
+  else {add('inpatient','Nội trú: học chuyên đề','2–2,5 giờ','Học kiến thức mới, ghi chú điểm quan trọng','inpatient');add('practice','Nội trú: làm câu hỏi','1–1,5 giờ','Câu hỏi vận dụng và chữa lỗi sai','inpatient')}
+ }else if(psychExam||tiExam)add('inpatient','Nội trú: duy trì kiến thức','1–2 giờ','Ôn nhẹ hoặc làm một nhóm câu hỏi nếu còn sức','inpatient');
+ if(!concert){
+  if(dow===1&&!['2026-11-16','2026-11-23','2026-11-30'].includes(date))add('vstep','VSTEP: Writing','60–90 phút','Viết một bài hoàn chỉnh và tự sửa lỗi','vstep');
+  if(dow===2)add('vstep','VSTEP: Speaking','60–90 phút','Luyện trả lời, ghi âm và tự đánh giá','vstep');
+  if(dow===3)add('vstep','VSTEP: Listening + Reading','60–90 phút','Làm bài tập theo thời gian','vstep');
+  if(dow===4)add('vstep','VSTEP: Writing','60–90 phút','Tập trung cấu trúc, lập luận và từ vựng','vstep');
+  if(dow===5)add('vstep','VSTEP: Speaking','60–90 phút','Luyện nói theo chủ đề và ghi âm','vstep');
+  if(dow===6)add('vstep','VSTEP: Listening + Reading','60–90 phút','Duy trì hai kỹ năng tiếp nhận','vstep');
+  if(dow===0)add('vstep','VSTEP: Writing + Speaking','90 phút','Ôn hai kỹ năng trọng tâm','vstep');
+  add('edit','Edit','2 giờ','Hoàn thành định mức công việc trong ngày','edit');
+  if(dow===6)add('ielts','IELTS online (không bắt buộc)','07:30–09:00','Có thể bỏ qua nếu bận hoặc cần nghỉ','ielts');
+  add('reading','Đọc sách','15–30 phút','Đọc thư giãn trước khi ngủ','reading');
+ }else add('reading','Đọc sách (tùy sức)','15 phút','Không bắt buộc trong ngày concert','reading');
+ return a;
+}
+function labelDate(s){const d=new Date(s+'T12:00:00');return ['Chủ Nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'][d.getDay()]}
+function allSavedDone(){let count=0;for(let i=0;i<27;i++){let d=new Date(start);d.setDate(start.getDate()+i);let s=d.toISOString().slice(0,10);for(const t of tasksFor(s))if(localStorage.getItem(key(s,t.id))==='1')count++}return count}
+function render(){
+ const date=dateInput.value, tasks=tasksFor(date), done=tasks.filter(t=>localStorage.getItem(key(date,t.id))==='1').length,pct=tasks.length?Math.round(done/tasks.length*100):0;
+ $('dayTitle').textContent=labelDate(date);$('pct').textContent=pct+'%';$('bar').style.width=pct+'%';$('countLabel').textContent=`${done} / ${tasks.length} nhiệm vụ`;
+ $('todayCount').textContent=`${done}/${tasks.length}`;$('todayPct').textContent=pct+'%';$('allDone').textContent=allSavedDone();
+ const events={'2026-11-14':'THI TÂM THẦN','2026-11-19':'THI TRUYỀN NHIỄM','2026-12-04':'THI TRUYỀN NHIỄM','2026-12-06':'CONCERT ATVNCG','2026-11-16':'T50 · 18h–23h','2026-11-23':'T50 · 18h–23h','2026-11-30':'T50 · 18h–23h'};
+ const tag=$('eventTag');tag.hidden=!events[date];tag.textContent=events[date]||'';
+ const root=$('tasks');root.innerHTML='';
+ tasks.forEach(t=>{const done=localStorage.getItem(key(date,t.id))==='1', c=cats[t.cat];const el=document.createElement('label');el.className='task'+(done?' done':'');el.innerHTML=`<div class="taskbody"><div class="meta"><span class="tag" style="background:${c[1]};color:${c[2]}">${c[0]}</span><span class="time">${t.time}</span></div><div class="taskname"></div><div class="detail"></div></div><input type="checkbox" ${done?'checked':''} aria-label="Hoàn thành">`;el.querySelector('.taskname').textContent=t.name;el.querySelector('.detail').textContent=t.detail;el.querySelector('input').addEventListener('change',e=>{localStorage.setItem(key(date,t.id),e.target.checked?'1':'0');render()});root.appendChild(el)});
+}
+dateInput.addEventListener('change',render);
+$('prev').onclick=()=>move(-1);$('next').onclick=()=>move(1);
+function move(n){const d=new Date(dateInput.value+'T12:00:00');d.setDate(d.getDate()+n);if(d>=start&&d<=end){dateInput.value=d.toISOString().slice(0,10);render()}}
+$('todayBtn').onclick=()=>{dateInput.value='2026-11-10';render()};
+$('reset').onclick=()=>{if(confirm('Bỏ đánh dấu tất cả công việc của ngày này?')){tasksFor(dateInput.value).forEach(t=>localStorage.removeItem(key(dateInput.value,t.id)));render()}};
+$('copy').onclick=async()=>{const d=dateInput.value,txt=tasksFor(d).map(t=>`${localStorage.getItem(key(d,t.id))==='1'?'[x]':'[ ]'} ${t.time} | ${t.name}`).join('\n');try{await navigator.clipboard.writeText(txt);$('copy').textContent='Đã copy!';setTimeout(()=>$('copy').textContent='▢ Copy checklist',1500)}catch(e){alert(txt)}};
+render();
+if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+let deferredPrompt;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;$('installHint').style.display='block';$('installHint').onclick=async()=>{deferredPrompt.prompt();deferredPrompt=null}});
+if(/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.matchMedia('(display-mode: standalone)').matches){$('installHint').style.display='block';$('installHint').textContent='Trên iPhone: mở trang bằng Safari → Chia sẻ → Thêm vào MH chính (Add to Home Screen).'}
+</script>
+</body></html>
